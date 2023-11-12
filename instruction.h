@@ -45,5 +45,4 @@ public:
     int process( Register *R , Memory *M , int l , int r , int step ) override ;
 };
 
-
 #endif //VOL_MACHINE_INSTRUCTION_H
