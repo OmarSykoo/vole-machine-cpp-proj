@@ -1,7 +1,3 @@
-//
-// Created by Sykoo on 11/10/2023.
-//
-
 #include "instruction.h"
 
 int _RXY1::process( Register *R , Memory *M, int l, int r , int step ){
