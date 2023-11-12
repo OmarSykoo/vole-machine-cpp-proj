@@ -1,16 +1,13 @@
-//
-// Created by Sykoo on 11/10/2023.
-//
 #ifndef VOL_MACHINE_INSTRUCTION_H
 #define VOL_MACHINE_INSTRUCTION_H
 #include "Register.h"
 #include "Memory.h"
 
-
 class instruction {
 public:
-    virtual int process( Register *R , Memory *M , int l , int r , int step );
-    virtual ~instruction() { } ;
+    // abstract class
+    virtual int process( Register *R , Memory *M , int l , int r , int step ) = 0 ;
+    virtual ~instruction() = default ;
 };
 
 class _RXY1 : public instruction {
