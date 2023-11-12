@@ -21,10 +21,46 @@ private :
     map< int , instruction* > instructions ;
     int step {0} ;
 public:
-    Machine() ;
+    Machine()  ;
     ~Machine() ;
-    void run() ;
     friend class Fetch_info ;
+    friend class Run_mach ;
+    friend class Clear ;
+    friend class print_info ;
+};
+
+class print_info {
+private:
+    Machine *a ;
+public:
+    print_info( Machine &pass ) : a(&pass) {}
+    void print(){
+        cout << "N R 0 1 2 3 4 5 6 7 8 9 A B C D E F\n" ;
+        for ( int i = 0 ; i < 16 ; i++ ){
+            cout << hex << i << ' ' ;
+            cout << hex << a->registers[i].get_value() << ' ' ;
+            for ( int j = 0 ; j < 16 ; j++ ){
+                cout << hex << a->addresses[ ( j << 4 ) + i ].get_value() << ' ' ;
+            }
+            cout << '\n' ;
+        }
+    }
+};
+
+class Clear {
+private:
+    Machine *a ;
+public:
+    Clear( Machine &pass ) : a(&pass) {}
+    void clear_memory() {
+        for ( auto& i : a->registers){
+            i.clear() ;
+        }
+        for ( auto& i : a->addresses ) {
+            i.clear() ;
+        }
+        a->step = 0 ;
+    }
 };
 
 class Fetch_info {
@@ -44,12 +80,22 @@ public:
     }
 };
 
-void Machine::run() {
-    while ( step != -1 && ( step / 2 < data_.size() ) ) {
-        pair<int,int> temp = data_[step / 2] ;
-        step = instructions[ ( ( (temp.first & 0xF0)) >> 4 ) ]->process(registers , addresses, (temp.first & 0x0F) , temp.second , step );
+class Run_mach {
+private:
+    Machine *a ;
+public:
+    Run_mach( Machine &pass ) : a( &pass ) {}
+    void run(){
+        while ( a->step != -1 && ( a->step / 2 < a->data_.size() ) ) {
+            pair<int,int> temp = a->data_[a->step / 2] ;
+            a->step = a->instructions[ ( ( (temp.first & 0xF0)) >> 4 ) ]->process(a->registers , a->addresses, (temp.first & 0x0F) , temp.second , a->step );
+        }
     }
-}
+    void single_step(){
+        pair<int,int> temp = a->data_[a->step / 2] ;
+        a->step = a->instructions[ ( ( (temp.first & 0xF0)) >> 4 ) ]->process(a->registers , a->addresses, (temp.first & 0x0F) , temp.second , a->step );
+    }
+};
 
 Machine::Machine() {
     instructions[0x1] = new _RXY1 ;
@@ -69,9 +115,48 @@ Machine::~Machine() {
 
 int main(){
     Machine vol ;
-    Fetch_info F(vol) ;
-    string text ; cin >> text ;
-    F.fetch( text ) ;
-    vol.run() ;
+    Run_mach Run_machine( vol ) ;
+    print_info print_memory(vol) ;
+    Fetch_info Fetch_(vol) ;
+    Clear clear_memory( vol ) ;
+    bool logged_in = true ;
+    while ( logged_in ){
+        cout << "1) Load Data \n" ;
+        cout << "2) Clear Memory \n" ;
+        cout << "3) Run\n" ;
+        cout << "4) Single step\n" ;
+        cout << "5) list information\n" ;
+        cout << "0) exit \n" ;
+        char c ; cin >> c ;
+        switch (c) {
+            case '0' :
+                logged_in = false ;
+                break;
+            case '1' :
+                Fetch_.fetch("input") ;
+                cout << "Data_loaded\n" ;
+                break;
+            case '2' :
+                clear_memory.clear_memory() ;
+                cout << "Cleared memory\n" ;
+                break;
+            case '3' :
+                Run_machine.run() ;
+                cout << "Running..\n" ;
+                break;
+            case '4' :
+                Run_machine.single_step() ;
+                cout << "Next_step...\n" ;
+                break;
+            case '5' :
+                print_memory.print() ;
+                cout << "printing_info...\n" ;
+                break;
+            default:
+                cout << "INVALID INPUT\n" << '\n' ;
+                cout << "Try Again\n" ;
+                break;
+        }
+    }
     return 0 ;
 }
