@@ -11,61 +11,6 @@
 #include "instruction.cpp"
 using namespace std;
 
-vector<instruction> all_instructions ;
-
-class Machine {
-private :
-    Register registers[16] ;
-    Memory addresses[256] ;
-    vector<pair<int,int>> data_ ;
-    map< int , instruction* > instructions ;
-    int step {0} ;
-public:
-    Machine()  ;
-    ~Machine() ;
-    void run(){
-        while ( step != -1 && ( step / 2 < data_.size() ) ) {
-            pair<int,int> temp = data_[ step / 2] ;
-            step = instructions[ ( ( (temp.first & 0xF0)) >> 4 ) ]->process(registers , addresses, (temp.first & 0x0F) , temp.second , step );
-        }
-    }
-    void single_step(){
-        pair<int,int> temp = data_[step / 2] ;
-        step = instructions[ ( ( (temp.first & 0xF0)) >> 4 ) ]->process( registers , addresses, (temp.first & 0x0F) , temp.second , step );
-    }
-    friend class Run_mach ;
-    void fetch( const string& text ){
-        ifstream fin(text + ".txt" ) ;
-        if ( fin.fail() ){
-            throw invalid_argument("can't open file \n") ;
-        }
-        int R , XY ;
-        while ( fin >> hex >> R >> XY ) {
-            data_.emplace_back( R , XY ) ;
-        }
-    }
-    void clear_memory() {
-        for ( auto& i : registers){
-            i.clear() ;
-        }
-        for ( auto& i : addresses ) {
-            i.clear() ;
-        }
-        step = 0 ;
-    }
-    void print(){
-        cout << "N R 0 1 2 3 4 5 6 7 8 9 A B C D E F\n" ;
-        for ( int i = 0 ; i < 16 ; i++ ){
-            cout << hex << i << ' ' ;
-            cout << hex << registers[i].get_value() << ' ' ;
-            for ( int j = 0 ; j < 16 ; j++ ){
-                cout << hex << addresses[ ( j << 4 ) + i ].get_value() << ' ' ;
-            }
-            cout << '\n' ;
-        }
-    }
-};
-
 Machine::Machine() {
     instructions[0x1] = new _RXY1 ;
     instructions[0x2] = new _RXY2 ;
