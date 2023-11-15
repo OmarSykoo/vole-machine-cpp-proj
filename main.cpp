@@ -33,8 +33,7 @@ public:
         pair<int,int> temp = data_[step / 2] ;
         step = instructions[ ( ( (temp.first & 0xF0)) >> 4 ) ]->process( registers , addresses, (temp.first & 0x0F) , temp.second , step );
     }
-    friend class Run_mach ;
-    void fetch( const string& text ){
+        void fetch( const string& text ){
         ifstream fin(text + ".txt" ) ;
         if ( fin.fail() ){
             throw invalid_argument("can't open file \n") ;
