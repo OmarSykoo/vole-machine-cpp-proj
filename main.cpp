@@ -15,7 +15,7 @@ using namespace std;
 vector<instruction> all_instructions;
 
 class Machine {
-private :
+private:
     Register registers[16];
     Memory addresses[256];
     vector<pair<int, int>> data_ ;
